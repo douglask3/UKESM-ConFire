@@ -1,0 +1,11 @@
+import iris
+### this was the ap4 file
+fn = "bc179a.p41930oct.pp"
+
+
+cl = iris.load(fn)
+
+##for c in cl:
+c = cl[0]
+print( c.name())
+print( c.attributes["STASH"])
