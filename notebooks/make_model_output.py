@@ -1,67 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# <table style="width: 100%; border-collapse: collapse;" border="0">
-# <tr>
-# <td><b>Created:</b> Monday 08 July 2019</td>
-# <td style="text-align: right;"><a href="https://github.com/douglask3/UKESM-ConFire">github.com/douglask3/UKESM-ConFire</td>
-# </tr>
-# </table>
-# 
-# <div>
-# <center>
-# <font face="Times">
-# <br>
-# <h1>Quantifying the uncertainity of a global fire limitation model using Bayesian inference</h1>
-# <h2>Part 3: Posterior sampling</h2>
-# <br>
-# <br>
-# <sup>1, </sup> Megan Brown,
-# <sup>1,* </sup>Douglas Kelley, 
-# <sup>2 </sup>Ioannis Bistinas,
-# <sup>3 </sup>Rhys Whitley,
-# <sup>4 </sup>Chantelle Burton, 
-# <sup>1 </sup>Tobias Marthews, 
-# <sup>6, 7 </sup>Ning Dong
-# <br>
-# <br>
-# <br>
-# <sup>1 </sup>Centre for Ecology and Hydrology, Maclean Building, Crowmarsh Gifford, Wallingford, Oxfordshire, United Kingdom
-# <br>
-# <sup>2 </sup>Vrije Universiteit Amsterdam, Faculty of Earth and Life Sciences, Amsterdam, Netherlands
-# <br>
-# <sup>3 </sup>Natural Perils Pricing, Commercial & Consumer Portfolio & Pricing, Suncorp Group, Sydney, Australia
-# <br>
-# <sup>4 </sup>Met Office United Kingdom, Exeter, United Kingdom
-# <br>
-# <sup>5 </sup>Centre for Past Climate Change and School of Archaeology, Geography and Environmental Sciences (SAGES), University of Reading, Reading, United Kingdom 
-# <br>
-# <sup>6 </sup>Department of Biological Sciences, Macquarie University, North Ryde, NSW 2109, Australia 
-# <br>
-# <br>
-# <h3>Summary</h3>
-# <hr>
-# <p> 
-# The previous notebook quantified the probability distribution of the model parameters of our global fire model. Here, we sample this distribution to obtain a number of key measures of fire regime: burnt area, and the value, limitation and sensitivity of fuel, moisture, ignitions and suppression controls.
-# </p>
-# <br>
-# <br>
-# <br>
-# <i>Python code and calculations below</i>
-# <br>
-# </font>
-# </center>
-# <hr>
-# </div>
-
-# ## Load libraries
-
-# In[7]:
-
-
-get_ipython().run_line_magic('load_ext', 'autoreload')
-get_ipython().run_line_magic('autoreload', '')
-
 import sys
 sys.path.append('../')
 
@@ -77,7 +16,6 @@ import csv
 import iris
 import matplotlib.pyplot as plt
 import numpy.ma as ma
-get_ipython().run_line_magic('matplotlib', 'inline')
 import cartopy.crs as ccrs
 from   libs.plot_maps    import *
 
@@ -86,24 +24,21 @@ from   libs.plot_maps    import *
 # 
 # Just needs to say where all the data is stored and fill out a netcdf or pp file for input.
 
-# In[13]:
+dir = '../data/retrieved_stash/2000-2014/'
 
+files = {'vegcover'           : 'vegcover2001-2014.nc',
+         'alphaMax'           : 'alphaMax2001-2014.nc',
+         'alpha'              : 'alpha2001-2014.nc',
+         'relative_humidity'  : 'relative_humidity2001-2014.nc',
+         'treeCover'          : 'treeCover2001-2014.nc',
+         'lightning'          : 'lightning2001-2014.nc',
+         'pasture'            : 'pasture2001-2014.nc',
+         'population_density' : 'pop_dens2001-2014.nc',
+         'cropland'           : 'cropland2001-2014.nc'}
 
-dir = '../data/UKESM/retrieved_codes/'
-
-files = {'vegcover'           : 'vegcover2000.nc',
-         'alphaMax'           : 'alphaMax2000.nc',
-         'alpha'              : 'alpha2000.nc',
-#         'emc'                : 'emc2000-2014_masked.nc',
-         'relative_humidity'  : 'relative_humidity2000.nc',
-         'treeCover'          : 'treecover2000.nc',
-         'lightning'          : 'lightning2000.nc',
-         'pasture'            : 'pasture2000.nc',
-#         'population_density' : 'population_density2000-2014_masked.nc',
-         'cropland'           : 'cropland2000.nc'}
-
-param_file = '../outputs/params-test_mask.csv'
-
+param_file = '../outputs/params_RH2.csv'
+dir_fig = '../figures/'
+print(dir)
 
 # Open data. The model takes data in the same dict class as above.
 
@@ -135,42 +70,7 @@ for key, dat in input_data.items():
     dat = dat.collapsed('time', iris.analysis.MEAN)
     dat.long_name = key
     plot_lonely_cube(dat, 3, 4, nd, cmap = 'magma', levels = None)    
-
-
-# ## The model
-# The model is now defined. See documentation paper in NCC for full model equations. This could be moved into a library at some point, but I've defined it here so you can have a proper look.
-# 
-# The model calculates a number of things needed to predict burnt area, and a few metric (potential limitation and sensitivity) on the fly. The things needed to calculate burnt area are ``ConFIRE.``:
-# 
-# * **Controls**:
-#     * ``fuel``: fuel continuity
-#     * ``moisture``: fuel mositure content 
-#     * ``ignitions``: potential ignitions
-#     * ``suppression``: human fire suppression and landscape fragmentation
-#     
-# * **Limitation from controls**, the maximum allowed fire considering limitation from:
-#     * ``standard_fuel``:  fuel 
-#     * ``standard_moisture``:  moisture
-#     * ``standard_ignitions``:  ignitions
-#     * ``standard_suppression``:  suppression
-#     
-# * and ``burnt_area``: burnt area from all limitations
-# 
-# Things calculated on the fly are:
-# 
-# * **Potential limitation**, the increase in burnt area if limitation where removed from:
-#     * ``potential_fuel``:  fuel 
-#     * ``potential_moisture``:  moisture
-#     * ``potential_ignitions``:  ignitions
-#     * ``potential_suppression``:  suppression
-# 
-# * **Sensitvity**, the rate of change in burnt area for a given control, relative to the maximum possible rate of change for that controls:
-#     * ``sensitivity_fuel``:  fuel 
-#     * ``sensitivity_moisture``:  moisture
-#     * ``sensitivity_ignitions``:  ignitions
-#     * ``sensitivity_suppression``:  suppression
-
-# In[11]:
+plt.savefig(dir_fig + "input_data.png")
 
 
 class ConFIRE(object):
@@ -379,7 +279,7 @@ class ConFIRE(object):
 # In[12]:
 
 
-model = ConFIRE(input_data, params.median()) #(Can run with mean)
+model = ConFIRE(input_data, params.loc[params["sigma"].idxmin()]) # Using minimum sigma instead of params.median() 
 
 
 # ### Plotting
@@ -393,7 +293,7 @@ burnt_area.long_name = "Annual burnt area (%)"
 burnt_area.data = burnt_area.data * 1200
 print(type(burnt_area))
 plot_lonely_cube(burnt_area, levels = [0, 1, 2, 5, 10, 20, 50, 100], cmap = "brewer_YlOrRd_09")
-
+plt.savefig(dir_fig + 'burnt_area.png')
 
 # #### Compare with 'observed' burnt area
 
@@ -407,7 +307,7 @@ obs_BA.long_name = " 'Observed' burnt area (%)"
 dat = obs_BA.collapsed('time', iris.analysis.MEAN)
 dat.data = dat.data * 1200 # To make annual and a percentage
 plot_lonely_cube(dat, 1, 2, 1, cmap = 'brewer_YlOrRd_09', levels = [0, 1, 2, 5, 10, 20, 50, 100])
-
+plt.savefig(dir_fig + 'observed_burnt_area.png')
 
 # #### Controls
 
@@ -430,7 +330,7 @@ plotModComponet(model.fuel, 1, levels = [0, 0.2, 0.4, 0.6, 0.8, 1.0], cmap = cma
 plotModComponet(model.moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.ignitions, 3, cmap = cmap_ignitions)
 plotModComponet(model.suppression, 4, cmap = cmap_suppression)
-
+plt.savefig(dir_fig + 'controls.png')
 
 # #### Standard Limitation
 
@@ -442,7 +342,7 @@ plotModComponet(model.standard_fuel, 1, cmap = cmap_fuel)
 plotModComponet(model.standard_moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.standard_ignitions, 3, cmap = cmap_ignitions)
 plotModComponet(model.standard_suppression, 4, cmap = cmap_suppression)
-
+plt.savefig(dir_fig + 'standard_limitation.png')
 
 # #### Potential limitation
 
@@ -459,7 +359,7 @@ plotModComponet(model.potential_ignitions(), 3, levels = levels, scale = 100,
                 cmap = cmap_ignitions)
 plotModComponet(model.potential_suppression(), 4, levels = levels, scale = 100,
                 cmap = cmap_suppression)
-
+plt.savefig(dir_fig + 'potential_limitation.png')
 
 # #### Sensitivty
 
@@ -476,7 +376,7 @@ plotModComponet(model.sensitivity_ignitions(), 3, scale = 100, levels = levels,
                 cmap = cmap_ignitions, extend = 'max')
 plotModComponet(model.sensitivity_suppression(), 4, scale = 100, levels = levels, 
                 cmap = "Greys", extend = 'max')
-
+plt.savefig(dir_fig + 'sensitivity.png')
 
 # In[22]:
 
@@ -513,10 +413,3 @@ for i in range(0, n_posterior, ngap):
     cubes = iris.cube.CubeList(cubes) 
     outFile = '../outputs/sampled_posterior_ConFire_solutions/RH_sample_no_' + str(i) +'.nc'
     iris.save(cubes, outFile)
-
-
-# In[ ]:
-
-
-
-
