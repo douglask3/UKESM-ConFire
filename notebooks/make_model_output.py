@@ -29,7 +29,7 @@ dir = '../data/retrieved_codes/2000-2014/'
 files = {'vegcover'           : 'vegcover2001-2014.nc',
          'alphaMax'           : 'alphaMax2001-2014.nc',
          'alpha'              : 'alpha2001-2014.nc',
-         'relative_humidity'  : 'relative_humidity_convert2001-2014.py',
+         'relative_humidity'  : 'relative_humidity_convert2001-2014.nc',
          'treeCover'          : 'treeCover2001-2014.nc',
          'lightning'          : 'lightning2001-2014.nc',
          'pasture'            : 'pasture2001-2014.nc',
