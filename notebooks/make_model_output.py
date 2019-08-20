@@ -29,15 +29,15 @@ dir = '../data/retrieved_codes/2000-2014/'
 files = {'vegcover'           : 'vegcover2001-2014.nc',
          'alphaMax'           : 'alphaMax2001-2014.nc',
          'alpha'              : 'alpha2001-2014.nc',
-         'relative_humidity'  : 'relative_humidity_convert2001-2014.py',
-         'treeCover'          : 'treeCover2001-2014.nc',
+         'relative_humidity'  : 'relative_humidity_convert2001-2014.nc',
+         'treeCover'          : 'treeCover_canopy2001-2014.nc',
          'lightning'          : 'lightning2001-2014.nc',
          'pasture'            : 'pasture2001-2014.nc',
          'population_density' : 'pop_dens2001-2014.nc',
          'cropland'           : 'cropland2001-2014.nc'}
 
 param_file = '../outputs/params_RH2.csv'
-dir_fig = '../figures/'
+dir_fig = '../figures/2000-2014/canopy/'
 print(dir)
 
 # Open data. The model takes data in the same dict class as above.
