@@ -30,7 +30,11 @@ files = {'vegcover'           : 'vegcover2001-2014.nc',
          'alphaMax'           : 'alphaMax2001-2014.nc',
          'alpha'              : 'alpha2001-2014.nc',
          'relative_humidity'  : 'relative_humidity_convert2001-2014.nc',
+<<<<<<< HEAD
          'treeCover'          : 'treeCover_canopy2001-2014.nc',
+=======
+         'treeCover'          : 'treeCover2001-2014.nc',
+>>>>>>> bbd171da555320f43f169c6b756f93460105538a
          'lightning'          : 'lightning2001-2014.nc',
          'pasture'            : 'pasture2001-2014.nc',
          'population_density' : 'pop_dens2001-2014.nc',
