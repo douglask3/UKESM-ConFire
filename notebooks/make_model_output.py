@@ -30,18 +30,15 @@ files = {'vegcover'           : 'vegcover2001-2014.nc',
          'alphaMax'           : 'alphaMax2001-2014.nc',
          'alpha'              : 'alpha2001-2014.nc',
          'relative_humidity'  : 'relative_humidity_convert2001-2014.nc',
-<<<<<<< HEAD
-         'treeCover'          : 'treeCover_canopy2001-2014.nc',
-=======
-         'treeCover'          : 'treeCover2001-2014.nc',
->>>>>>> bbd171da555320f43f169c6b756f93460105538a
+         'treeCover'          : 'treeCover_evergreen_canopy2001-2014.nc',
          'lightning'          : 'lightning2001-2014.nc',
          'pasture'            : 'pasture2001-2014.nc',
          'population_density' : 'pop_dens2001-2014.nc',
          'cropland'           : 'cropland2001-2014.nc'}
 
 param_file = '../outputs/params_RH2.csv'
-dir_fig = '../figures/2000-2014/canopy/'
+dir_fig = '../figures/2000-2014/evergreen_canopy/'
+outfile = '../outputs/sampled_posterior_ConFire_solutions/evergreen_canopy_sample_no_' 
 print(dir)
 
 # Open data. The model takes data in the same dict class as above.
@@ -415,5 +412,5 @@ for i in range(0, n_posterior, ngap):
                          model.sensitivity_ignitions(), model.sensitivity_suppression()]
 
     cubes = iris.cube.CubeList(cubes)
-    outFile = '../outputs/sampled_posterior_ConFire_solutions/RH_sample_no_' + str(i) +'.nc'
-    iris.save(cubes, outFile)
+    File = str(i) +'.nc'
+    iris.save(cubes, outfile + File)
