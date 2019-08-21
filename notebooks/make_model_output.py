@@ -299,16 +299,16 @@ plt.savefig(dir_fig + 'burnt_area.png')
 
 # In[17]:
 
-
-plt.rcParams['figure.figsize'] = [12, 6]
-obs_BA = iris.load_cube(dir + 'fire2000-2014_masked.nc')
-obs_BA.long_name = " 'Observed' burnt area (%)"
-
-dat = obs_BA.collapsed('time', iris.analysis.MEAN)
-dat.data = dat.data * 1200 # To make annual and a percentage
-plot_lonely_cube(dat, 1, 2, 1, cmap = 'brewer_YlOrRd_09', levels = [0, 1, 2, 5, 10, 20, 50, 100])
-plt.savefig(dir_fig + 'observed_burnt_area.png')
-
+# 
+# plt.rcParams['figure.figsize'] = [12, 6]
+# obs_BA = iris.load_cube(dir + 'fire2000-2014_masked.nc')
+# obs_BA.long_name = " 'Observed' burnt area (%)"
+# 
+# dat = obs_BA.collapsed('time', iris.analysis.MEAN)
+# dat.data = dat.data * 1200 # To make annual and a percentage
+# plot_lonely_cube(dat, 1, 2, 1, cmap = 'brewer_YlOrRd_09', levels = [0, 1, 2, 5, 10, 20, 50, 100])
+# plt.savefig(dir_fig + 'observed_burnt_area.png')
+# 
 # #### Controls
 
 # In[18]:
