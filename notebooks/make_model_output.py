@@ -391,6 +391,25 @@ plotModComponet(model.sensitivity_suppression(), 4, scale = 100, levels = levels
                 cmap = "Greys", extend = 'max')
 if fig:
     plt.savefig(dir_fig + 'sensitivity.png')
+    
+# Outputs:
+
+cubes = [model.burnt_area]
+cubes = cubes + [model.fuel, model.moisture, 
+                 model.ignitions, model.suppression]
+
+cubes = cubes + [model.standard_fuel, model.standard_moisture, 
+                 model.standard_ignitions, model.standard_suppression]
+
+cubes = cubes + [model.potential_fuel(), model.potential_moisture(),                 
+                 model.potential_ignitions(), model.potential_suppression()]
+
+cubes = cubes + [model.sensitivity_fuel(), model.sensitivity_moisture(),                  
+                 model.sensitivity_ignitions(), model.sensitivity_suppression()]
+
+cubes = iris.cube.CubeList(cubes) 
+iris.save(cubes, outfile + File)
+
 
 # In[22]:
 
