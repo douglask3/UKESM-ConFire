@@ -30,15 +30,22 @@ files = {'vegcover'           : 'vegcover2001-2014.nc',
          'alphaMax'           : 'alphaMax2001-2014.nc',
          'alpha'              : 'alpha2001-2014.nc',
          'relative_humidity'  : 'relative_humidity_convert2001-2014.nc',
-         'treeCover'          : 'treeCover_evergreen_canopy2001-2014.nc',
+         'treeCover'          : 'treeCover_canopy2001-2014.nc',
          'lightning'          : 'lightning2001-2014.nc',
          'pasture'            : 'pasture2001-2014.nc',
          'population_density' : 'pop_dens2001-2014.nc',
          'cropland'           : 'cropland2001-2014.nc'}
 
 param_file = '../outputs/params_RH2.csv'
-dir_fig = '../figures/2000-2014/evergreen_canopy/'
-outfile = '../outputs/sampled_posterior_ConFire_solutions/evergreen_canopy_sample_no_' 
+
+# Turn figures on:
+fig = False # False
+# dir_fig = '../figures/2000-2014/evergreen_canopy/'
+
+outfile = '../outputs/model_runs/'
+File = 'canopy.nc'
+
+
 print(dir)
 
 # Open data. The model takes data in the same dict class as above.
@@ -71,7 +78,8 @@ for key, dat in input_data.items():
     dat = dat.collapsed('time', iris.analysis.MEAN)
     dat.long_name = key
     plot_lonely_cube(dat, 3, 4, nd, cmap = 'magma', levels = None)
-plt.savefig(dir_fig + "input_data.png")
+if fig:
+    plt.savefig(dir_fig + "input_data.png")
 
 
 class ConFIRE(object):
@@ -294,7 +302,8 @@ burnt_area.long_name = "Annual burnt area (%)"
 burnt_area.data = burnt_area.data * 1200
 print(type(burnt_area))
 plot_lonely_cube(burnt_area, levels = [0, 1, 2, 5, 10, 20, 50, 100], cmap = "brewer_YlOrRd_09")
-plt.savefig(dir_fig + 'burnt_area.png')
+if fig:
+    plt.savefig(dir_fig + 'burnt_area.png')
 
 # #### Compare with 'observed' burnt area
 
@@ -331,7 +340,8 @@ plotModComponet(model.fuel, 1, levels = [0, 0.2, 0.4, 0.6, 0.8, 1.0], cmap = cma
 plotModComponet(model.moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.ignitions, 3, cmap = cmap_ignitions)
 plotModComponet(model.suppression, 4, cmap = cmap_suppression)
-plt.savefig(dir_fig + 'controls.png')
+if fig:
+    plt.savefig(dir_fig + 'controls.png')
 
 # #### Standard Limitation
 
@@ -343,7 +353,8 @@ plotModComponet(model.standard_fuel, 1, cmap = cmap_fuel)
 plotModComponet(model.standard_moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.standard_ignitions, 3, cmap = cmap_ignitions)
 plotModComponet(model.standard_suppression, 4, cmap = cmap_suppression)
-plt.savefig(dir_fig + 'standard_limitation.png')
+if fig:
+    plt.savefig(dir_fig + 'standard_limitation.png')
 
 # #### Potential limitation
 
@@ -360,7 +371,8 @@ plotModComponet(model.potential_ignitions(), 3, levels = levels, scale = 100,
                 cmap = cmap_ignitions)
 plotModComponet(model.potential_suppression(), 4, levels = levels, scale = 100,
                 cmap = cmap_suppression)
-plt.savefig(dir_fig + 'potential_limitation.png')
+if fig:
+    plt.savefig(dir_fig + 'potential_limitation.png')
 
 # #### Sensitivty
 
@@ -377,40 +389,42 @@ plotModComponet(model.sensitivity_ignitions(), 3, scale = 100, levels = levels,
                 cmap = cmap_ignitions, extend = 'max')
 plotModComponet(model.sensitivity_suppression(), 4, scale = 100, levels = levels,
                 cmap = "Greys", extend = 'max')
-plt.savefig(dir_fig + 'sensitivity.png')
+if fig:
+    plt.savefig(dir_fig + 'sensitivity.png')
 
 # In[22]:
 
+# This is for bootstrapping - not needed for model runs
 
-n_posterior = params.shape[1]
-n_posterior_sample = 2
-ngap = int(n_posterior/n_posterior_sample)
+# n_posterior = params.shape[1]
+# n_posterior_sample = 2
+# ngap = int(n_posterior/n_posterior_sample)
 
-output_controls = True
-output_standard_limitation = True
-output_potential_limitation = True
-output_sensitivity = True
+# output_controls = True
+# output_standard_limitation = True
+# output_potential_limitation = True
+# output_sensitivity = True
 
-for i in range(0, n_posterior, ngap):
-    model = ConFIRE(input_data, params.iloc[i])
-    cubes = [model.burnt_area]
+# for i in range(0, n_posterior, ngap):
+#     model = ConFIRE(input_data, params.iloc[i])
+#     cubes = [model.burnt_area]
 
-    if output_controls:
-        cubes = cubes + [model.fuel, model.moisture,
-                         model.ignitions, model.suppression]
+#     if output_controls:
+#         cubes = cubes + [model.fuel, model.moisture,
+#                          model.ignitions, model.suppression]
 
-    if output_standard_limitation:
-        cubes = cubes + [model.standard_fuel, model.standard_moisture,
-                         model.standard_ignitions, model.standard_suppression]
+#     if output_standard_limitation:
+#         cubes = cubes + [model.standard_fuel, model.standard_moisture,
+#                          model.standard_ignitions, model.standard_suppression]
 
-    if output_potential_limitation:
-        cubes = cubes + [model.potential_fuel(), model.potential_moisture(),
-                         model.potential_ignitions(), model.potential_suppression()]
+#     if output_potential_limitation:
+#         cubes = cubes + [model.potential_fuel(), model.potential_moisture(),
+#                          model.potential_ignitions(), model.potential_suppression()]
 
-    if output_sensitivity:
-        cubes = cubes + [model.sensitivity_fuel(), model.sensitivity_moisture(),
-                         model.sensitivity_ignitions(), model.sensitivity_suppression()]
+#     if output_sensitivity:
+#         cubes = cubes + [model.sensitivity_fuel(), model.sensitivity_moisture(),
+#                          model.sensitivity_ignitions(), model.sensitivity_suppression()]
 
-    cubes = iris.cube.CubeList(cubes)
-    File = str(i) +'.nc'
-    iris.save(cubes, outfile + File)
+#     cubes = iris.cube.CubeList(cubes)
+#     File = str(i) +'.nc'
+#     iris.save(cubes, outfile + File)
