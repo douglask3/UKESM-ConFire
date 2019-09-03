@@ -1,67 +1,6 @@
 
 # coding: utf-8
 
-# <table style="width: 100%; border-collapse: collapse;" border="0">
-# <tr>
-# <td><b>Created:</b> Monday 08 July 2019</td>
-# <td style="text-align: right;"><a href="https://github.com/douglask3/UKESM-ConFire">github.com/douglask3/UKESM-ConFire</td>
-# </tr>
-# </table>
-# 
-# <div>
-# <center>
-# <font face="Times">
-# <br>
-# <h1>Quantifying the uncertainity of a global fire limitation model using Bayesian inference</h1>
-# <h2>Part 3: Posterior sampling</h2>
-# <br>
-# <br>
-# <sup>1, </sup> Megan Brown,
-# <sup>1,* </sup>Douglas Kelley, 
-# <sup>2 </sup>Ioannis Bistinas,
-# <sup>3 </sup>Rhys Whitley,
-# <sup>4 </sup>Chantelle Burton, 
-# <sup>1 </sup>Tobias Marthews, 
-# <sup>6, 7 </sup>Ning Dong
-# <br>
-# <br>
-# <br>
-# <sup>1 </sup>Centre for Ecology and Hydrology, Maclean Building, Crowmarsh Gifford, Wallingford, Oxfordshire, United Kingdom
-# <br>
-# <sup>2 </sup>Vrije Universiteit Amsterdam, Faculty of Earth and Life Sciences, Amsterdam, Netherlands
-# <br>
-# <sup>3 </sup>Natural Perils Pricing, Commercial & Consumer Portfolio & Pricing, Suncorp Group, Sydney, Australia
-# <br>
-# <sup>4 </sup>Met Office United Kingdom, Exeter, United Kingdom
-# <br>
-# <sup>5 </sup>Centre for Past Climate Change and School of Archaeology, Geography and Environmental Sciences (SAGES), University of Reading, Reading, United Kingdom 
-# <br>
-# <sup>6 </sup>Department of Biological Sciences, Macquarie University, North Ryde, NSW 2109, Australia 
-# <br>
-# <br>
-# <h3>Summary</h3>
-# <hr>
-# <p> 
-# The previous notebook quantified the probability distribution of the model parameters of our global fire model. Here, we sample this distribution to obtain a number of key measures of fire regime: burnt area, and the value, limitation and sensitivity of fuel, moisture, ignitions and suppression controls.
-# </p>
-# <br>
-# <br>
-# <br>
-# <i>Python code and calculations below</i>
-# <br>
-# </font>
-# </center>
-# <hr>
-# </div>
-
-# ## Load libraries
-
-# In[1]:
-
-
-get_ipython().run_line_magic('load_ext', 'autoreload')
-get_ipython().run_line_magic('autoreload', '')
-
 import sys
 sys.path.append('../')
 
@@ -77,10 +16,10 @@ import csv
 import iris
 import matplotlib.pyplot as plt
 import numpy.ma as ma
-get_ipython().run_line_magic('matplotlib', 'inline')
 import cartopy.crs as ccrs
 from   libs.plot_maps    import *
 
+from pdb import set_trace
 
 # ## Input information
 # 
@@ -89,8 +28,8 @@ from   libs.plot_maps    import *
 # In[4]:
 
 
-dir = '../data/UKESM/retrieved_codes/2000-2014/'
-
+dir = '../data/retrieved_codes/2000-2014/'
+ 
 files = {'vegcover'           : 'vegcover2001-2014.nc',
          'alphaMax'           : 'alphaMax2001-2014.nc',
          'alpha'              : 'alpha2001-2014.nc',
@@ -101,17 +40,28 @@ files = {'vegcover'           : 'vegcover2001-2014.nc',
          'pasture'            : 'pasture2001-2014.nc',
          'population_density' : 'pop_dens2001-2014.nc',
          'cropland'           : 'cropland2001-2014.nc'}
+ 
+# # Observation files
+# dir = '../data/obs/'
+# 
+# files = {'alphaMax'           : 'alpha_12monthMax2000-2014_masked.nc',
+# 		 'alpha'              : 'alpha2000-2014_masked.nc',
+# 		 'cropland'           : 'cropland2000-2014_masked.nc',
+# 		 'fire'               : 'fire2000-2014_masked.nc',
+# 		 'lightning'          : 'lightning_ignitions2000-2014_masked.nc',
+# 		 'pasture'            : 'pasture2000-2014_masked.nc',
+# 		 'population_density' : 'population_density2000-2014_masked.nc',
+# 		 'relative_humidity'  : 'relative_humidity2000-2014_masked.nc',
+# # 		 'treeCover'          : 'treecover2000-2014_masked.nc',
+# 		 'vegcover'           : 'vegcover2000-2014_masked.nc'}
+# 
+param_file = '../outputs/params_RH3.csv'
 
+fig = True # False
+dir_fig = '../figures/2000-2014/no_tree/'
 
 outfile = '../outputs/model_runs/'
-File = 'canopy.nc'
-param_file = '../outputs/params_RH2.csv'
-
-fig = False # False
-# dir_fig = '../figures/2000-2014/evergreen_canopy/'
-
-outfile = '../outputs/model_runs/'
-File = 'canopy.nc'
+File = 'no_tree.nc'
 
 
 # Open data. The model takes data in the same dict class as above.
@@ -148,42 +98,6 @@ if fig:
     plt.savefig(dir_fig + "input_data.png")
 
 
-# ## The model
-# The model is now defined. See documentation paper in NCC for full model equations. This could be moved into a library at some point, but I've defined it here so you can have a proper look.
-# 
-# The model calculates a number of things needed to predict burnt area, and a few metric (potential limitation and sensitivity) on the fly. The things needed to calculate burnt area are ``ConFIRE.``:
-# 
-# * **Controls**:
-#     * ``fuel``: fuel continuity
-#     * ``moisture``: fuel mositure content 
-#     * ``ignitions``: potential ignitions
-#     * ``suppression``: human fire suppression and landscape fragmentation
-#     
-# * **Limitation from controls**, the maximum allowed fire considering limitation from:
-#     * ``standard_fuel``:  fuel 
-#     * ``standard_moisture``:  moisture
-#     * ``standard_ignitions``:  ignitions
-#     * ``standard_suppression``:  suppression
-#     
-# * and ``burnt_area``: burnt area from all limitations
-# 
-# Things calculated on the fly are:
-# 
-# * **Potential limitation**, the increase in burnt area if limitation where removed from:
-#     * ``potential_fuel``:  fuel 
-#     * ``potential_moisture``:  moisture
-#     * ``potential_ignitions``:  ignitions
-#     * ``potential_suppression``:  suppression
-# 
-# * **Sensitvity**, the rate of change in burnt area for a given control, relative to the maximum possible rate of change for that controls:
-#     * ``sensitivity_fuel``:  fuel 
-#     * ``sensitivity_moisture``:  moisture
-#     * ``sensitivity_ignitions``:  ignitions
-#     * ``sensitivity_suppression``:  suppression
-
-# In[11]:
-
-
 class ConFIRE(object):
     def __init__(self, data, params): 
         """
@@ -198,7 +112,6 @@ class ConFIRE(object):
         
         self.moisture = self.control_moisture(data['alpha'], data['relative_humidity'],
                                               self.params['alpha_pw'], self.params['rh_pw'], self.params['cM'])
-        
         self.ignitions = self.control_ignitions(data['lightning'], data['pasture'], data['population_density'],
                                               self.params['cP'], self.params['cD1'])
         
@@ -210,6 +123,7 @@ class ConFIRE(object):
                                             self.params[       'fuel_x0'], self.params[       'fuel_k'])
         self.standard_moisture    = self.sigmoid(self.moisture   ,
                                             self.params[   'moisture_x0'], -self.params[   'moisture_k'])
+        set_trace()
         self.standard_ignitions   = self.sigmoid(self.ignitions   ,
                                             self.params[  'ignitions_x0'], self.params[  'ignitions_k'])
         self.standard_suppression = self.sigmoid(self.suppression,
@@ -259,11 +173,11 @@ class ConFIRE(object):
         return (vegcover**fuel_pw) * (fuel_pg * (alphaMax-1) + 1) / (1 + fuel_pg)
 
     
-    def control_moisture(self, alpha, rh, alpha_pw, rh_pw, cM, cMT):
+    def control_moisture(self, alpha, rh, alpha_pw, rh_pw, cM):
         """
         Definition to describe moisture
         """
-        return (alpha**alpha_pw + cM*rh**rh_pw + cMT) / (1 + cM + cMT)
+        return ((alpha/1.25)**alpha_pw + cM*rh**rh_pw) / (1 + cM) 
 
     
     def control_ignitions(self, lightning, pasture, population_density, cP, cD1):
@@ -411,18 +325,18 @@ if fig:
 # #### Compare with 'observed' burnt area
 
 # In[17]:
-
-
-plt.rcParams['figure.figsize'] = [12, 6]
-obs_BA = iris.load_cube(dir + 'fire2000-2014_masked.nc')
-obs_BA.long_name = " 'Observed' burnt area (%)"
-
-dat = obs_BA.collapsed('time', iris.analysis.MEAN)
-dat.data = dat.data * 1200 # To make annual and a percentage
-plot_lonely_cube(dat, 1, 2, 1, cmap = 'brewer_YlOrRd_09', levels = [0, 1, 2, 5, 10, 20, 50, 100])
-if fig:
-    plt.savefig(dir_fig + 'observed_burnt_area.png')
-
+# 
+# 
+# plt.rcParams['figure.figsize'] = [12, 6]
+# obs_BA = iris.load_cube(dir + 'fire2000-2014_masked.nc')
+# obs_BA.long_name = " 'Observed' burnt area (%)"
+# 
+# dat = obs_BA.collapsed('time', iris.analysis.MEAN)
+# dat.data = dat.data * 1200 # To make annual and a percentage
+# plot_lonely_cube(dat, 1, 2, 1, cmap = 'brewer_YlOrRd_09', levels = [0, 1, 2, 5, 10, 20, 50, 100])
+# if fig:
+#     plt.savefig(dir_fig + 'observed_burnt_area.png')
+# 
 
 # #### Controls
 
