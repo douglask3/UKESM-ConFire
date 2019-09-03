@@ -25,8 +25,6 @@ from pdb import set_trace
 #
 # Just needs to say where all the data is stored and fill out a netcdf or pp file for input.
 
-# In[4]:
-
 
 dir = '../data/retrieved_codes/2000-2014/'
 
@@ -55,13 +53,13 @@ files = {'vegcover'           : 'vegcover2001-2014.nc',
 # # 		 'treeCover'          : 'treecover2000-2014_masked.nc',
 # 		 'vegcover'           : 'vegcover2000-2014_masked.nc'}
 #
-param_file = '../outputs/params_RH3.csv'
+param_file = '../outputs/params_RH4.csv'
 
 fig = True # False
-dir_fig = '../figures/2000-2014/no_tree/'
+dir_fig = '../figures/2000-2014/no_tree_reoptimised/'
 
 outfile = '../outputs/model_runs/'
-File = 'no_tree.nc'
+File = 'no_tree_reoptimised.nc'
 
 
 # Open data. The model takes data in the same dict class as above.
@@ -111,7 +109,7 @@ class ConFIRE(object):
                                       self.params['fuel_pg'])
 
         self.moisture = self.control_moisture(data['alpha'], data['relative_humidity'],
-                                              self.params['alpha_pw'], self.params['rh_pw'], self.params['cM'])
+                                              self.params['cM'])
         self.ignitions = self.control_ignitions(data['lightning'], data['pasture'], data['population_density'],
                                               self.params['cP'], self.params['cD1'])
 
@@ -123,7 +121,6 @@ class ConFIRE(object):
                                             self.params[       'fuel_x0'], self.params[       'fuel_k'])
         self.standard_moisture    = self.sigmoid(self.moisture   ,
                                             self.params[   'moisture_x0'], -self.params[   'moisture_k'])
-        set_trace()
         self.standard_ignitions   = self.sigmoid(self.ignitions   ,
                                             self.params[  'ignitions_x0'], self.params[  'ignitions_k'])
         self.standard_suppression = self.sigmoid(self.suppression,
