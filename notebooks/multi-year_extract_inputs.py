@@ -102,6 +102,10 @@ for l in stash_conFIRE.keys():
         # Merge all cubes together
         cube_list = iris.cube.CubeList(aList)
         cubes = cube_list.merge_cube()
+        
+        # Convert units
+        if l == 'relative_humidity':
+            cubes.convert_units(1)
 
         # For skipping the first x months
         #xxx
@@ -181,6 +185,8 @@ for l in stash_conFIRE.keys():
         for t in range(time):
             cube_soil.data[t,:,:] = cube_soil.data[t,:,:] * porosity.data * 1.2 / 50
 
+        # Adjust units to 1
+        cube_soil.units = 1 
         
         #xxx
         cube_soil_skip_year = cube_soil[d:,:,:]
