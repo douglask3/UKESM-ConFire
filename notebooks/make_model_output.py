@@ -22,22 +22,34 @@ from   libs.plot_maps    import *
 from pdb import set_trace
 
 # ## Input information
-#
+
 # Just needs to say where all the data is stored and fill out a netcdf or pp file for input.
 
 
+
+
+###----------HEAD----------###
+
+# To Doug [05/09/2019]: Please can you keep the script between the HEAD and FOOT borders
+
+###---------FOOT----------###
+
+
+
+
+###----------HEAD----------###
 dir = '../data/retrieved_codes/2000-2014/'
 
-files = {'vegcover'           : 'vegcover2001-2014.nc',
-         'alphaMax'           : 'alphaMax2001-2014.nc',
-         'alpha'              : 'alpha2001-2014.nc',
+files = {'vegcover'           : 'vegcover2000-2014.nc',
+         'alphaMax'           : 'alphaMax2000-2014.nc',
+         'alpha'              : 'alpha2000-2014.nc',
 #         'emc'                : 'emc2000-2014_masked.nc',
-         'relative_humidity'  : 'relative_humidity_convert_scaled_2001-2014.nc',
-#          'treeCover'          : 'treeCover2001-2014.nc',
-         'lightning'          : 'lightning_c2001-2014.nc',
-         'pasture'            : 'pasture2001-2014.nc',
-         'population_density' : 'pop_dens2001-2014.nc',
-         'cropland'           : 'cropland2001-2014.nc'}
+         'relative_humidity'  : 'relative_humidity_convert_scaled_2000-2014.nc',
+#          'treeCover'          : 'treeCover2000-2014.nc',
+         'lightning'          : 'lightning_c2000-2014.nc',
+         'pasture'            : 'pasture2000-2014.nc',
+         'population_density' : 'pop_dens2000-2014.nc',
+         'cropland'           : 'cropland2000-2014.nc'}
  
 # Observation files
 # dir = '../data/obs/'
@@ -61,6 +73,8 @@ dir_fig = '../figures/2000-2014/' + title_output + '/'
 
 outfile = '../outputs/model_runs/2000-2014/'
 File = title_output + '.nc'
+
+###----------FOOT----------###
 
 
 # Open data. The model takes data in the same dict class as above.
@@ -93,8 +107,10 @@ for key, dat in input_data.items():
     dat = dat.collapsed('time', iris.analysis.MEAN)
     dat.long_name = key
     plot_lonely_cube(dat, 3, 4, nd, cmap = 'magma', levels = None)
+###----------HEAD----------###
 if fig:
     plt.savefig(dir_fig + "input_data.png")
+###----------FOOT----------###
 
 
 class ConFIRE(object):
@@ -302,7 +318,9 @@ class ConFIRE(object):
 # In[12]:
 
 
+###----------HEAD---------###
 model = ConFIRE(input_data, params.loc[params["sigma"].idxmin()]) # We're using the row which has minimum sigma
+###----------FOOT--------###
 
 
 # ### Plotting
@@ -316,8 +334,10 @@ burnt_area.long_name = "Annual burnt area (%)"
 burnt_area.data = burnt_area.data * 1200
 print(type(burnt_area))
 plot_lonely_cube(burnt_area, levels = [0, 1, 2, 5, 10, 20, 50, 100], cmap = "brewer_YlOrRd_09")
+###----------HEAD----------###
 if fig:
     plt.savefig(dir_fig + 'burnt_area.png')
+###----------FOOT----------###
 
 
 # #### Compare with 'observed' burnt area
@@ -357,8 +377,10 @@ plotModComponet(model.fuel, 1, levels = [0, 0.2, 0.4, 0.6, 0.8, 1.0], cmap = cma
 plotModComponet(model.moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.ignitions, 3, cmap = cmap_ignitions)
 plotModComponet(model.suppression, 4, cmap = cmap_suppression)
+###----------HEAD----------###
 if fig:
     plt.savefig(dir_fig + 'controls.png')
+###----------FOOT----------###
 
 
 # #### Standard Limitation
@@ -371,8 +393,10 @@ plotModComponet(model.standard_fuel, 1, cmap = cmap_fuel)
 plotModComponet(model.standard_moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.standard_ignitions, 3, cmap = cmap_ignitions)
 plotModComponet(model.standard_suppression, 4, cmap = cmap_suppression)
+###----------HEAD----------###
 if fig:
     plt.savefig(dir_fig + 'standard_limitation.png')
+###----------FOOT----------###
 
 
 # #### Potential limitation
@@ -390,8 +414,10 @@ plotModComponet(model.potential_ignitions(), 3, levels = levels, scale = 100,
                 cmap = cmap_ignitions)
 plotModComponet(model.potential_suppression(), 4, levels = levels, scale = 100,
                 cmap = cmap_suppression)
+###----------HEAD----------###
 if fig:
     plt.savefig(dir_fig + 'potential_limitation.png')
+###----------FOOT----------###
 
 
 # #### Sensitivty
@@ -409,8 +435,10 @@ plotModComponet(model.sensitivity_ignitions(), 3, scale = 100, levels = levels,
                 cmap = cmap_ignitions, extend = 'max')
 plotModComponet(model.sensitivity_suppression(), 4, scale = 100, levels = levels,
                 cmap = "Greys", extend = 'max')
+###----------HEAD----------###
 if fig:
     plt.savefig(dir_fig + 'sensitivity.png')
+###----------FOOT----------###
 
 
 # This is for bootstrapping (not needed to make the model outputs)
@@ -420,6 +448,7 @@ if fig:
 # In[ ]:
 
 
+###----------HEAD----------###
 cubes = [model.burnt_area]
 cubes = cubes + [model.fuel, model.moisture,
                  model.ignitions, model.suppression]
@@ -435,6 +464,7 @@ cubes = cubes + [model.sensitivity_fuel(), model.sensitivity_moisture(),
 
 cubes = iris.cube.CubeList(cubes)
 iris.save(cubes, outfile + File)
+###----------FOOT----------###
 
 
 # In[22]:
