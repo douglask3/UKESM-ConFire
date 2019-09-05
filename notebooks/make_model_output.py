@@ -89,20 +89,54 @@ from   libs.plot_maps    import *
 # In[13]:
 
 
-dir = '../data/UKESM/retrieved_codes/'
+###----------HEAD----------###
 
-files = {'vegcover'           : 'vegcover2000.nc',
-         'alphaMax'           : 'alphaMax2000.nc',
-         'alpha'              : 'alpha2000.nc',
+# To Doug [05/09/2019]: Please can you keep the script between the HEAD and FOOT borders
+
+###---------FOOT----------###
+
+
+
+
+###----------HEAD----------###
+dir = '../data/retrieved_codes/2000-2014/'
+
+files = {'vegcover'           : 'vegcover2000-2014.nc',
+         'alphaMax'           : 'alphaMax2000-2014.nc',
+         'alpha'              : 'alpha2000-2014.nc',
 #         'emc'                : 'emc2000-2014_masked.nc',
-         'relative_humidity'  : 'relative_humidity2000.nc',
-         'treeCover'          : 'treecover2000.nc',
-         'lightning'          : 'lightning2000.nc',
-         'pasture'            : 'pasture2000.nc',
-#         'population_density' : 'population_density2000-2014_masked.nc',
-         'cropland'           : 'cropland2000.nc'}
+         'relative_humidity'  : 'relative_humidity_convert_scaled_2000-2014.nc',
+#          'treeCover'          : 'treeCover2000-2014.nc',
+         'lightning'          : 'lightning_c2000-2014.nc',
+         'pasture'            : 'pasture2000-2014.nc',
+         'population_density' : 'pop_dens2000-2014.nc',
+         'cropland'           : 'cropland2000-2014.nc'}
 
-param_file = '../outputs/params-test_mask.csv'
+
+# Observation files
+# dir = '../data/obs/'
+# #
+# files = {'alphaMax'           : 'alpha_12monthMax2000-2014_masked.nc',
+# 		 'alpha'              : 'alpha2000-2014_masked.nc',
+# 		 'cropland'           : 'cropland2000-2014_masked.nc',
+# 		 'fire'               : 'fire2000-2014_masked.nc',
+# 		 'lightning'          : 'lightning_ignitions2000-2014_masked.nc',
+# 		 'pasture'            : 'pasture2000-2014_masked.nc',
+# 		 'population_density' : 'population_density2000-2014_masked.nc',
+# 		 'relative_humidity'  : 'relative_humidity2000-2014_masked.nc',
+# # 		 'treeCover'          : 'treecover2000-2014_masked.nc',
+# 		 'vegcover'           : 'vegcover2000-2014_masked.nc'}
+# 
+param_file = '../outputs/params_RH4.csv'
+title_output = 'no_tree_scaled_RH_light_c'
+
+fig = True # False
+dir_fig = '../figures/2000-2014/' + title_output + '/'
+
+outfile = '../outputs/model_runs/2000-2014/'
+File = title_output + '.nc'
+
+###----------FOOT----------###
 
 
 # Open data. The model takes data in the same dict class as above.
@@ -135,7 +169,10 @@ for key, dat in input_data.items():
     dat = dat.collapsed('time', iris.analysis.MEAN)
     dat.long_name = key
     plot_lonely_cube(dat, 3, 4, nd, cmap = 'magma', levels = None)    
-
+###----------HEAD----------###
+if fig:
+    plt.savefig(dir_fig + "input_data.png")
+###----------FOOT----------###
 
 # ## The model
 # The model is now defined. See documentation paper in NCC for full model equations. This could be moved into a library at some point, but I've defined it here so you can have a proper look.
@@ -378,8 +415,9 @@ class ConFIRE(object):
 
 # In[12]:
 
-
-model = ConFIRE(input_data, params.median()) #(Can run with mean)
+###----------HEAD---------###
+model = ConFIRE(input_data, params.loc[params["sigma"].idxmin()]) # We're using the row which has minimum sigma
+###----------FOOT--------###
 
 
 # ### Plotting
@@ -393,6 +431,10 @@ burnt_area.long_name = "Annual burnt area (%)"
 burnt_area.data = burnt_area.data * 1200
 print(type(burnt_area))
 plot_lonely_cube(burnt_area, levels = [0, 1, 2, 5, 10, 20, 50, 100], cmap = "brewer_YlOrRd_09")
+###----------HEAD----------###
+if fig:
+    plt.savefig(dir_fig + 'burnt_area.png')
+###----------FOOT----------###
 
 
 # #### Compare with 'observed' burnt area
@@ -430,7 +472,10 @@ plotModComponet(model.fuel, 1, levels = [0, 0.2, 0.4, 0.6, 0.8, 1.0], cmap = cma
 plotModComponet(model.moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.ignitions, 3, cmap = cmap_ignitions)
 plotModComponet(model.suppression, 4, cmap = cmap_suppression)
-
+###----------HEAD----------###
+if fig:
+    plt.savefig(dir_fig + 'controls.png')
+###----------FOOT----------###
 
 # #### Standard Limitation
 
@@ -442,7 +487,10 @@ plotModComponet(model.standard_fuel, 1, cmap = cmap_fuel)
 plotModComponet(model.standard_moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.standard_ignitions, 3, cmap = cmap_ignitions)
 plotModComponet(model.standard_suppression, 4, cmap = cmap_suppression)
-
+###----------HEAD----------###
+if fig:
+    plt.savefig(dir_fig + 'standard_limitation.png')
+###----------FOOT----------###
 
 # #### Potential limitation
 
@@ -459,7 +507,10 @@ plotModComponet(model.potential_ignitions(), 3, levels = levels, scale = 100,
                 cmap = cmap_ignitions)
 plotModComponet(model.potential_suppression(), 4, levels = levels, scale = 100,
                 cmap = cmap_suppression)
-
+###----------HEAD----------###
+if fig:
+    plt.savefig(dir_fig + 'potential_limitation.png')
+###----------FOOT----------###
 
 # #### Sensitivty
 
@@ -476,44 +527,29 @@ plotModComponet(model.sensitivity_ignitions(), 3, scale = 100, levels = levels,
                 cmap = cmap_ignitions, extend = 'max')
 plotModComponet(model.sensitivity_suppression(), 4, scale = 100, levels = levels, 
                 cmap = "Greys", extend = 'max')
-
+###----------HEAD----------###
+if fig:
+    plt.savefig(dir_fig + 'sensitivity.png')
+###----------FOOT----------###
 
 # In[22]:
+###----------HEAD----------###
+cubes = [model.burnt_area]
+cubes = cubes + [model.fuel, model.moisture,
+                 model.ignitions, model.suppression]
 
+cubes = cubes + [model.standard_fuel, model.standard_moisture,
+                 model.standard_ignitions, model.standard_suppression]
 
-n_posterior = params.shape[1]
-n_posterior_sample = 2
-ngap = int(n_posterior/n_posterior_sample)
+cubes = cubes + [model.potential_fuel(), model.potential_moisture(),
+                 model.potential_ignitions(), model.potential_suppression()]
 
-output_controls = True
-output_standard_limitation = True
-output_potential_limitation = True
-output_sensitivity = True
+cubes = cubes + [model.sensitivity_fuel(), model.sensitivity_moisture(),
+                 model.sensitivity_ignitions(), model.sensitivity_suppression()]
 
-for i in range(0, n_posterior, ngap):
-    model = ConFIRE(input_data, params.iloc[i])
-    cubes = [model.burnt_area]
-    
-    if output_controls:
-        cubes = cubes + [model.fuel, model.moisture, 
-                         model.ignitions, model.suppression]
-        
-    if output_standard_limitation:
-        cubes = cubes + [model.standard_fuel, model.standard_moisture, 
-                         model.standard_ignitions, model.standard_suppression]
-    
-    if output_potential_limitation:
-        cubes = cubes + [model.potential_fuel(), model.potential_moisture(),                 
-                         model.potential_ignitions(), model.potential_suppression()]
-    
-    if output_sensitivity:
-        cubes = cubes + [model.sensitivity_fuel(), model.sensitivity_moisture(),                  
-                         model.sensitivity_ignitions(), model.sensitivity_suppression()]
-    
-    cubes = iris.cube.CubeList(cubes) 
-    outFile = '../outputs/sampled_posterior_ConFire_solutions/RH_sample_no_' + str(i) +'.nc'
-    iris.save(cubes, outFile)
-
+cubes = iris.cube.CubeList(cubes)
+iris.save(cubes, outfile + File)
+###----------FOOT----------###
 
 # In[ ]:
 
