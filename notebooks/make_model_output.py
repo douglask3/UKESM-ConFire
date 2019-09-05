@@ -32,16 +32,16 @@ files = {'vegcover'           : 'vegcover2001-2014.nc',
          'alphaMax'           : 'alphaMax2001-2014.nc',
          'alpha'              : 'alpha2001-2014.nc',
 #         'emc'                : 'emc2000-2014_masked.nc',
-         'relative_humidity'  : 'relative_humidity_convert2001-2014.nc',
-         'treeCover'          : 'treeCover2001-2014.nc',
-         'lightning'          : 'lightning2001-2014.nc',
+         'relative_humidity'  : 'relative_humidity_convert_scaled_2001-2014.nc',
+#          'treeCover'          : 'treeCover2001-2014.nc',
+         'lightning'          : 'lightning_c2001-2014.nc',
          'pasture'            : 'pasture2001-2014.nc',
          'population_density' : 'pop_dens2001-2014.nc',
          'cropland'           : 'cropland2001-2014.nc'}
-
-# # Observation files
+ 
+# Observation files
 # dir = '../data/obs/'
-#
+# #
 # files = {'alphaMax'           : 'alpha_12monthMax2000-2014_masked.nc',
 # 		 'alpha'              : 'alpha2000-2014_masked.nc',
 # 		 'cropland'           : 'cropland2000-2014_masked.nc',
@@ -52,14 +52,15 @@ files = {'vegcover'           : 'vegcover2001-2014.nc',
 # 		 'relative_humidity'  : 'relative_humidity2000-2014_masked.nc',
 # # 		 'treeCover'          : 'treecover2000-2014_masked.nc',
 # 		 'vegcover'           : 'vegcover2000-2014_masked.nc'}
-#
+# 
 param_file = '../outputs/params_RH4.csv'
+title_output = 'no_tree_scaled_RH_light_c'
 
 fig = True # False
-dir_fig = '../figures/2000-2014/no_tree_reoptimised/'
+dir_fig = '../figures/2000-2014/' + title_output + '/'
 
-outfile = '../outputs/model_runs/'
-File = 'no_tree_reoptimised.nc'
+outfile = '../outputs/model_runs/2000-2014/'
+File = title_output + '.nc'
 
 
 # Open data. The model takes data in the same dict class as above.
