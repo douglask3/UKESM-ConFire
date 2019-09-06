@@ -1,67 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# <table style="width: 100%; border-collapse: collapse;" border="0">
-# <tr>
-# <td><b>Created:</b> Monday 08 July 2019</td>
-# <td style="text-align: right;"><a href="https://github.com/douglask3/UKESM-ConFire">github.com/douglask3/UKESM-ConFire</td>
-# </tr>
-# </table>
-# 
-# <div>
-# <center>
-# <font face="Times">
-# <br>
-# <h1>Quantifying the uncertainity of a global fire limitation model using Bayesian inference</h1>
-# <h2>Part 3: Posterior sampling</h2>
-# <br>
-# <br>
-# <sup>1, </sup> Megan Brown,
-# <sup>1,* </sup>Douglas Kelley, 
-# <sup>2 </sup>Ioannis Bistinas,
-# <sup>3 </sup>Rhys Whitley,
-# <sup>4 </sup>Chantelle Burton, 
-# <sup>1 </sup>Tobias Marthews, 
-# <sup>6, 7 </sup>Ning Dong
-# <br>
-# <br>
-# <br>
-# <sup>1 </sup>Centre for Ecology and Hydrology, Maclean Building, Crowmarsh Gifford, Wallingford, Oxfordshire, United Kingdom
-# <br>
-# <sup>2 </sup>Vrije Universiteit Amsterdam, Faculty of Earth and Life Sciences, Amsterdam, Netherlands
-# <br>
-# <sup>3 </sup>Natural Perils Pricing, Commercial & Consumer Portfolio & Pricing, Suncorp Group, Sydney, Australia
-# <br>
-# <sup>4 </sup>Met Office United Kingdom, Exeter, United Kingdom
-# <br>
-# <sup>5 </sup>Centre for Past Climate Change and School of Archaeology, Geography and Environmental Sciences (SAGES), University of Reading, Reading, United Kingdom 
-# <br>
-# <sup>6 </sup>Department of Biological Sciences, Macquarie University, North Ryde, NSW 2109, Australia 
-# <br>
-# <br>
-# <h3>Summary</h3>
-# <hr>
-# <p> 
-# The previous notebook quantified the probability distribution of the model parameters of our global fire model. Here, we sample this distribution to obtain a number of key measures of fire regime: burnt area, and the value, limitation and sensitivity of fuel, moisture, ignitions and suppression controls.
-# </p>
-# <br>
-# <br>
-# <br>
-# <i>Python code and calculations below</i>
-# <br>
-# </font>
-# </center>
-# <hr>
-# </div>
-
-# ## Load libraries
-
-# In[7]:
-
-
-get_ipython().run_line_magic('load_ext', 'autoreload')
-get_ipython().run_line_magic('autoreload', '')
-
 import sys
 sys.path.append('../')
 
@@ -86,27 +22,17 @@ from   libs.plot_maps    import *
 # 
 # Just needs to say where all the data is stored and fill out a netcdf or pp file for input.
 
-# In[13]:
 
-
-###----------HEAD----------###
-
-# To Doug [05/09/2019]: Please can you keep the script between the HEAD and FOOT borders
-
-###---------FOOT----------###
-
-
-
-
-###----------HEAD----------###
 dir = '../data/retrieved_codes/2000-2014/'
 
 files = {'vegcover'           : 'vegcover2000-2014.nc',
          'alphaMax'           : 'alphaMax2000-2014.nc',
          'alpha'              : 'alpha2000-2014.nc',
-#         'emc'                : 'emc2000-2014_masked.nc',
          'relative_humidity'  : 'relative_humidity_convert_scaled_2000-2014.nc',
+         # Modelled:
 #          'treeCover'          : 'treeCover2000-2014.nc',
+         # Observed:
+		 'treeCover'          : 'treecover2000-2014_masked.nc',
          'lightning'          : 'lightning_c2000-2014.nc',
          'pasture'            : 'pasture2000-2014.nc',
          'population_density' : 'pop_dens2000-2014.nc',
@@ -124,7 +50,7 @@ files = {'vegcover'           : 'vegcover2000-2014.nc',
 # 		 'pasture'            : 'pasture2000-2014_masked.nc',
 # 		 'population_density' : 'population_density2000-2014_masked.nc',
 # 		 'relative_humidity'  : 'relative_humidity2000-2014_masked.nc',
-# # 		 'treeCover'          : 'treecover2000-2014_masked.nc',
+# 		 'treeCover'          : 'treecover2000-2014_masked.nc',
 # 		 'vegcover'           : 'vegcover2000-2014_masked.nc'}
 # 
 param_file = '../outputs/params_RH4.csv'
@@ -135,9 +61,6 @@ dir_fig = '../figures/2000-2014/' + title_output + '/'
 
 outfile = '../outputs/model_runs/2000-2014/'
 File = title_output + '.nc'
-
-###----------FOOT----------###
-
 
 # Open data. The model takes data in the same dict class as above.
 
@@ -168,11 +91,10 @@ for key, dat in input_data.items():
     nd = nd + 1
     dat = dat.collapsed('time', iris.analysis.MEAN)
     dat.long_name = key
-    plot_lonely_cube(dat, 3, 4, nd, cmap = 'magma', levels = None)    
-###----------HEAD----------###
+    plot_lonely_cube(dat, 3, 4, nd, cmap = 'magma', levels = None)
+    plt.suptitle(title_output, fontsize=16)
 if fig:
     plt.savefig(dir_fig + "input_data.png")
-###----------FOOT----------###
 
 # ## The model
 # The model is now defined. See documentation paper in NCC for full model equations. This could be moved into a library at some point, but I've defined it here so you can have a proper look.
@@ -415,9 +337,7 @@ class ConFIRE(object):
 
 # In[12]:
 
-###----------HEAD---------###
 model = ConFIRE(input_data, params.loc[params["sigma"].idxmin()]) # We're using the row which has minimum sigma
-###----------FOOT--------###
 
 
 # ### Plotting
@@ -431,10 +351,9 @@ burnt_area.long_name = "Annual burnt area (%)"
 burnt_area.data = burnt_area.data * 1200
 print(type(burnt_area))
 plot_lonely_cube(burnt_area, levels = [0, 1, 2, 5, 10, 20, 50, 100], cmap = "brewer_YlOrRd_09")
-###----------HEAD----------###
+plt.suptitle(title_output, fontsize=16)
 if fig:
     plt.savefig(dir_fig + 'burnt_area.png')
-###----------FOOT----------###
 
 
 # #### Compare with 'observed' burnt area
@@ -442,13 +361,13 @@ if fig:
 # In[17]:
 
 
-plt.rcParams['figure.figsize'] = [12, 6]
-obs_BA = iris.load_cube(dir + 'fire2000-2014_masked.nc')
-obs_BA.long_name = " 'Observed' burnt area (%)"
+# plt.rcParams['figure.figsize'] = [12, 6]
+# obs_BA = iris.load_cube(dir + 'fire2000-2014_masked.nc')
+# obs_BA.long_name = " 'Observed' burnt area (%)"
 
-dat = obs_BA.collapsed('time', iris.analysis.MEAN)
-dat.data = dat.data * 1200 # To make annual and a percentage
-plot_lonely_cube(dat, 1, 2, 1, cmap = 'brewer_YlOrRd_09', levels = [0, 1, 2, 5, 10, 20, 50, 100])
+# dat = obs_BA.collapsed('time', iris.analysis.MEAN)
+# dat.data = dat.data * 1200 # To make annual and a percentage
+# plot_lonely_cube(dat, 1, 2, 1, cmap = 'brewer_YlOrRd_09', levels = [0, 1, 2, 5, 10, 20, 50, 100])
 
 
 # #### Controls
@@ -472,10 +391,9 @@ plotModComponet(model.fuel, 1, levels = [0, 0.2, 0.4, 0.6, 0.8, 1.0], cmap = cma
 plotModComponet(model.moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.ignitions, 3, cmap = cmap_ignitions)
 plotModComponet(model.suppression, 4, cmap = cmap_suppression)
-###----------HEAD----------###
+plt.suptitle(title_output, fontsize=16)
 if fig:
     plt.savefig(dir_fig + 'controls.png')
-###----------FOOT----------###
 
 # #### Standard Limitation
 
@@ -487,10 +405,9 @@ plotModComponet(model.standard_fuel, 1, cmap = cmap_fuel)
 plotModComponet(model.standard_moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.standard_ignitions, 3, cmap = cmap_ignitions)
 plotModComponet(model.standard_suppression, 4, cmap = cmap_suppression)
-###----------HEAD----------###
+plt.suptitle(title_output, fontsize=16)
 if fig:
     plt.savefig(dir_fig + 'standard_limitation.png')
-###----------FOOT----------###
 
 # #### Potential limitation
 
@@ -507,10 +424,9 @@ plotModComponet(model.potential_ignitions(), 3, levels = levels, scale = 100,
                 cmap = cmap_ignitions)
 plotModComponet(model.potential_suppression(), 4, levels = levels, scale = 100,
                 cmap = cmap_suppression)
-###----------HEAD----------###
+plt.suptitle(title_output, fontsize=16)
 if fig:
     plt.savefig(dir_fig + 'potential_limitation.png')
-###----------FOOT----------###
 
 # #### Sensitivty
 
@@ -527,13 +443,11 @@ plotModComponet(model.sensitivity_ignitions(), 3, scale = 100, levels = levels,
                 cmap = cmap_ignitions, extend = 'max')
 plotModComponet(model.sensitivity_suppression(), 4, scale = 100, levels = levels, 
                 cmap = "Greys", extend = 'max')
-###----------HEAD----------###
+plt.suptitle(title_output, fontsize=16)
 if fig:
     plt.savefig(dir_fig + 'sensitivity.png')
-###----------FOOT----------###
 
 # In[22]:
-###----------HEAD----------###
 cubes = [model.burnt_area]
 cubes = cubes + [model.fuel, model.moisture,
                  model.ignitions, model.suppression]
@@ -549,7 +463,6 @@ cubes = cubes + [model.sensitivity_fuel(), model.sensitivity_moisture(),
 
 cubes = iris.cube.CubeList(cubes)
 iris.save(cubes, outfile + File)
-###----------FOOT----------###
 
 # In[ ]:
 
