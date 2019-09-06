@@ -2,14 +2,8 @@
 # coding: utf-8
 
 # ## Retrieving input from UK-ESM: mulitple years
-# 
+ 
 # This is to be run on JASMIN and points to the revelent directories in that working space. For a more detailed walk through, go to retrieve_stash
-
-# In[ ]:
-
-
-get_ipython().run_line_magic('load_ext', 'autoreload')
-get_ipython().run_line_magic('autoreload', '')
 
 import iris
 import iris.coord_categorisation
@@ -26,20 +20,17 @@ sys.path.append('../')
 import warnings
 warnings.filterwarnings('ignore')
 
-# from   libs.plot_maps    import *
+# from   libs.plot_maps import *
 
 
 # ### Setting up variables
 
-# In[24]:
-
-
-dir = '/home/users/mbrown/UKESM/u-bc179/ap5/'
-dir_poro = '/home/users/mbrown/'
-outfile = '/home/users/mbrown/outputs/'
+dir = '/gws/nopw/j04/cmip6_prep_vol1/ukesm1-initial/CMIP6/CMIP/UKESM1-0-LL/historical/u-bc179/ap5/'
+dir_poro = '../data/'
+outfile = '../data/retrieved_codes/2000-2014/'
 
 # The year ranges that you want
-years = range(2000,2015)
+years = range(1999,2015)
 
 months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
 files = []
@@ -51,18 +42,11 @@ for year in years:
 d = 12 # 12 # The number of months to skip for alphaMax
 
 
-# In[5]:
-
-
 stash_conFIRE = {'vegcover'           : 'm01s03i317',
                  'alpha'              : 'm01s08i223',
                  'lightning'          : 'm01s50i082',
 #                'population_density' : 'population_density2000-2014.nc',
                  'relative_humidity'  : 'm01s03i245'}
-
-
-# In[ ]:
-
 
 treeCover = [101, 102, 103, 201, 202]
 cropland = [301, 401]
@@ -76,10 +60,6 @@ for x in range(0, len(name)):
 
 
 # ### Extracting variables from the files
-# 
-# I'm going to try and condense this down into one cell on Jupter notebooks (it may not work though)
-
-# In[ ]:
 
 
 stash_l = [ 'lightning', 'relative_humidity']
@@ -102,13 +82,34 @@ for l in stash_conFIRE.keys():
         # Merge all cubes together
         cube_list = iris.cube.CubeList(aList)
         cubes = cube_list.merge_cube()
+        
+        # Changing units (RH)
+        if l == 'relative_humidity':
+            cubes.convert_units(1)
+            time = len(cubes.coord("time").points)
+            for t in range(time):
+                cubes.data[t,:,:] = cubes.data[t,:,:] / 100
+                
+            print('Range of relative humdity: ' + str(cubes.data.min) + '-' + str(cubes.data.max))
+        
+        # Changing units (lightning)
+        if l == 'lightning':
+            F = cubes
+            cubes_F = cubes
+            
+            F.data = (cubes.data * 1000000)**(0.4180) * 0.0408
+            F.data[adj_sim.data > 1] = 1
+            F.data[pop_sim.data == 0] = 0
+            cubes_F = F.data * cubes.data
+            
+            cubes = cubes_F
 
         # For skipping the first x months
         #xxx
         cubes = cubes[d:,:,:]
 
         print(l + ' has been saved')
-        out = outfile + l + str(years[0]) + '-' + str(years[len(years)-1]) + '.nc'
+        out = outfile + l + str(years[1]) + '-' + str(years[len(years)-1]) + '.nc'
         iris.save(cubes, out)
         
         
@@ -145,7 +146,7 @@ for l in stash_conFIRE.keys():
             #xxx
             cube = cube[d:,:,:,:].collapsed(['pseudo_level'], iris.analysis.SUM)
 
-            out = outfile + name[var_type] + str(years[0]) + '-' + str(years[len(years)-1]) + '.nc'
+            out = outfile + name[var_type] + str(years[1]) + '-' + str(years[len(years)-1]) + '.nc'
             iris.save(cube, out)
             print(name[var_type] + ' has been saved')
             
@@ -181,12 +182,14 @@ for l in stash_conFIRE.keys():
         for t in range(time):
             cube_soil.data[t,:,:] = cube_soil.data[t,:,:] * porosity.data * 1.2 / 50
 
+        # Adjust units to 1
+        cube_soil.units = 1 
         
         #xxx
         cube_soil_skip_year = cube_soil[d:,:,:]
 
         # Save alpha
-        out = outfile + cube_soil.long_name + str(years[0]) + '-' + str(years[len(years)-1]) + '.nc'
+        out = outfile + cube_soil.long_name + str(years[1]) + '-' + str(years[len(years)-1]) + '.nc'
         iris.save(cube_soil_skip_year, out)
         print(str(l) + ' has been saved')
 
@@ -207,13 +210,6 @@ for l in stash_conFIRE.keys():
 
         # Saving alphaMax
         alphaMax.long_name = 'alphaMax'
-        out = outfile + alphaMax.long_name + str(years[0]) + '-' + str(years[len(years)-1]) + '.nc'
+        out = outfile + alphaMax.long_name + str(years[1]) + '-' + str(years[len(years)-1]) + '.nc'
         iris.save(alphaMax, out)
         print(alphaMax.long_name + ' has been saved')
-
-
-# In[ ]:
-
-
-
-
