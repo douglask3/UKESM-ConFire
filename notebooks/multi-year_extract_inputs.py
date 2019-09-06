@@ -24,8 +24,7 @@ warnings.filterwarnings('ignore')
 
 
 # ### Setting up variables
-
-dir = '/gws/nopw/j04/cmip6_prep_vol1/ukesm1-initial/CMIP6/CMIP/UKESM1-0-LL/historical/u-bc179/ap5/'
+dir = '/gws/nopw/j04/cmip6_prep_vol1/ukesm1-initial/CMIP6/CMIP/UKESM1-0-LL/historical/r1i1p1f2/round-1-monthly/input/u-bc179/ap5/'
 dir_poro = '../data/'
 outfile = '../data/retrieved_codes/2000-2014/'
 
@@ -43,10 +42,11 @@ d = 12 # 12 # The number of months to skip for alphaMax
 
 
 stash_conFIRE = {'vegcover'           : 'm01s03i317',
-                 'alpha'              : 'm01s08i223',
-                 'lightning'          : 'm01s50i082',
+#                  'alpha'              : 'm01s08i223',
+                 'lightning'          : 'm01s50i082'}
 #                'population_density' : 'population_density2000-2014.nc',
-                 'relative_humidity'  : 'm01s03i245'}
+#                  'relative_humidity'  : 'm01s03i245'}
+
 
 treeCover = [101, 102, 103, 201, 202]
 cropland = [301, 401]
@@ -61,8 +61,6 @@ for x in range(0, len(name)):
 
 # ### Extracting variables from the files
 
-
-stash_l = [ 'lightning', 'relative_humidity']
 
 for l in stash_conFIRE.keys():
     
@@ -98,19 +96,23 @@ for l in stash_conFIRE.keys():
             cubes_F = cubes
             
             F.data = (cubes.data * 1000000)**(0.4180) * 0.0408
-            F.data[adj_sim.data > 1] = 1
-            F.data[pop_sim.data == 0] = 0
-            cubes_F = F.data * cubes.data
-            
-            cubes = cubes_F
+            F.data[F.data > 1] = 1
+            F.data[cubes.data == 0] = 0
+            cubes_F.data = F.data * cubes.data
+            cubes_F = cubes_F[d:,:,:]
+
+            print(type(cubes_F))
 
         # For skipping the first x months
         #xxx
-        cubes = cubes[d:,:,:]
 
-        print(l + ' has been saved')
         out = outfile + l + str(years[1]) + '-' + str(years[len(years)-1]) + '.nc'
-        iris.save(cubes, out)
+        if l == 'lightning':
+            iris.save(cubes_F, out)
+        else:
+            cubes = cubes[d:,:,:]
+            iris.save(cubes, out)
+        print(l + ' has been saved')
         
         
     # For vegcover, treecover, pasture and cropland
