@@ -13,7 +13,6 @@ import csv
 import iris
 import matplotlib.pyplot as plt
 import numpy.ma as ma
-get_ipython().run_line_magic('matplotlib', 'inline')
 import cartopy.crs as ccrs
 from   libs.plot_maps    import *
 
@@ -25,36 +24,38 @@ from   libs.plot_maps    import *
 
 dir = '../data/retrieved_codes/2000-2014/'
 
-files = {'vegcover'           : 'vegcover2000-2014.nc',
-         'alphaMax'           : 'alphaMax2000-2014.nc',
-         'alpha'              : 'alpha2000-2014.nc',
-         'relative_humidity'  : 'relative_humidity_convert_scaled_2000-2014.nc',
-         # Modelled:
+# Data in retrieved_codes/2000-2014 has already been scaled and adjusted (e.g. lightning, RH)
+ 
+# files = {'vegcover'           : 'vegcover2000-2014.nc',
+#          'alphaMax'           : 'alphaMax2000-2014.nc',
+#          'alpha'              : 'alpha2000-2014.nc',
+#          'relative_humidity'  : 'relative_humidity2000-2014.nc',
+#          # Modelled:
 #          'treeCover'          : 'treeCover2000-2014.nc',
-         # Observed:
-		 'treeCover'          : 'treecover2000-2014_masked.nc',
-         'lightning'          : 'lightning_c2000-2014.nc',
-         'pasture'            : 'pasture2000-2014.nc',
-         'population_density' : 'pop_dens2000-2014.nc',
-         'cropland'           : 'cropland2000-2014.nc'}
-
+#          # Observed:
+# # 		 'treeCover'          : 'treecover2000-2014_masked.nc',
+#          'lightning'          : 'lightning2000-2014.nc',
+#          'pasture'            : 'pasture2000-2014.nc',
+#          'population_density' : 'pop_dens2000-2014.nc',
+#          'cropland'           : 'cropland2000-2014.nc'}
+# 
 
 # Observation files
-# dir = '../data/obs/'
-# #
-# files = {'alphaMax'           : 'alpha_12monthMax2000-2014_masked.nc',
-# 		 'alpha'              : 'alpha2000-2014_masked.nc',
-# 		 'cropland'           : 'cropland2000-2014_masked.nc',
-# 		 'fire'               : 'fire2000-2014_masked.nc',
-# 		 'lightning'          : 'lightning_ignitions2000-2014_masked.nc',
-# 		 'pasture'            : 'pasture2000-2014_masked.nc',
-# 		 'population_density' : 'population_density2000-2014_masked.nc',
-# 		 'relative_humidity'  : 'relative_humidity2000-2014_masked.nc',
-# 		 'treeCover'          : 'treecover2000-2014_masked.nc',
-# 		 'vegcover'           : 'vegcover2000-2014_masked.nc'}
-# 
-param_file = '../outputs/params_RH4.csv'
-title_output = 'no_tree_scaled_RH_light_c'
+dir = '../data/obs/'
+
+files = {'alphaMax'           : 'alpha_12monthMax2000-2014_masked.nc',
+		 'alpha'              : 'alpha2000-2014_masked.nc',
+		 'cropland'           : 'cropland2000-2014_masked.nc',
+		 'fire'               : 'fire2000-2014_masked.nc',
+		 'lightning'          : 'lightning_ignitions2000-2014_masked.nc',
+		 'pasture'            : 'pasture2000-2014_masked.nc',
+		 'population_density' : 'population_density2000-2014_masked.nc',
+		 'relative_humidity'  : 'relative_humidity2000-2014_masked.nc',
+		 'treeCover'          : 'treecover2000-2014_masked.nc',
+		 'vegcover'           : 'vegcover2000-2014_masked.nc'}
+
+param_file = '../outputs/params_RH2.csv'
+title_output = 'obs_full'
 
 fig = True # False
 dir_fig = '../figures/2000-2014/' + title_output + '/'
@@ -93,6 +94,7 @@ for key, dat in input_data.items():
     dat.long_name = key
     plot_lonely_cube(dat, 3, 4, nd, cmap = 'magma', levels = None)
     plt.suptitle(title_output, fontsize=16)
+    plt.subplots_adjust(top=0.88)
 if fig:
     plt.savefig(dir_fig + "input_data.png")
 
@@ -351,7 +353,10 @@ burnt_area.long_name = "Annual burnt area (%)"
 burnt_area.data = burnt_area.data * 1200
 print(type(burnt_area))
 plot_lonely_cube(burnt_area, levels = [0, 1, 2, 5, 10, 20, 50, 100], cmap = "brewer_YlOrRd_09")
+plt.subplots_adjust(top=0.88)
 plt.suptitle(title_output, fontsize=16)
+plt.subplots_adjust(top=0.88)
+
 if fig:
     plt.savefig(dir_fig + 'burnt_area.png')
 
@@ -392,6 +397,7 @@ plotModComponet(model.moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.ignitions, 3, cmap = cmap_ignitions)
 plotModComponet(model.suppression, 4, cmap = cmap_suppression)
 plt.suptitle(title_output, fontsize=16)
+plt.subplots_adjust(top=0.88)
 if fig:
     plt.savefig(dir_fig + 'controls.png')
 
@@ -406,6 +412,7 @@ plotModComponet(model.standard_moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.standard_ignitions, 3, cmap = cmap_ignitions)
 plotModComponet(model.standard_suppression, 4, cmap = cmap_suppression)
 plt.suptitle(title_output, fontsize=16)
+plt.subplots_adjust(top=0.88)
 if fig:
     plt.savefig(dir_fig + 'standard_limitation.png')
 
@@ -425,6 +432,7 @@ plotModComponet(model.potential_ignitions(), 3, levels = levels, scale = 100,
 plotModComponet(model.potential_suppression(), 4, levels = levels, scale = 100,
                 cmap = cmap_suppression)
 plt.suptitle(title_output, fontsize=16)
+plt.subplots_adjust(top=0.88)
 if fig:
     plt.savefig(dir_fig + 'potential_limitation.png')
 
@@ -444,6 +452,7 @@ plotModComponet(model.sensitivity_ignitions(), 3, scale = 100, levels = levels,
 plotModComponet(model.sensitivity_suppression(), 4, scale = 100, levels = levels, 
                 cmap = "Greys", extend = 'max')
 plt.suptitle(title_output, fontsize=16)
+plt.subplots_adjust(top=0.88)
 if fig:
     plt.savefig(dir_fig + 'sensitivity.png')
 
