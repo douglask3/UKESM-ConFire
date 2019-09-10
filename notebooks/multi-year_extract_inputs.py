@@ -3,7 +3,9 @@
 
 # ## Retrieving input from UK-ESM: mulitple years
  
-# This is to be run on JASMIN and points to the revelent directories in that working space. For a more detailed walk through, go to retrieve_stash
+# This is to be run on JASMIN and points to the revelent directories in that working space.
+# For a more detailed walk through, go to retrieve_stash
+# [10/09/19]: I've taken out the scaling of RH to turn it into a probability as I think this is already done
 
 import iris
 import iris.coord_categorisation
@@ -85,9 +87,9 @@ for l in stash_conFIRE.keys():
         if l == 'relative_humidity':
             cubes.convert_units(1)
             time = len(cubes.coord("time").points)
-            for t in range(time):
-                cubes.data[t,:,:] = cubes.data[t,:,:] / 100
-                
+#             for t in range(time):
+#                 cubes.data[t,:,:] = cubes.data[t,:,:] / 100
+                 
             print('Range of relative humdity: ' + str(cubes.data.min) + '-' + str(cubes.data.max))
         
         # Changing units (lightning)
