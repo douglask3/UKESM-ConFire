@@ -2,7 +2,7 @@
 # coding: utf-8
 
 # ## Retrieving input from UK-ESM: mulitple years
- 
+
 # This is to be run on JASMIN and points to the revelent directories in that working space.
 # For a more detailed walk through, go to retrieve_stash
 # [10/09/19]: I've taken out the scaling of RH to turn it into a probability as I think this is already done
@@ -38,8 +38,8 @@ files = []
 for year in years:
     for month in months:
         files.append('bc179a.p5' + str(year) + month +'.pp')
-        
-        
+
+
 d = 12 # 12 # The number of months to skip for alphaMax
 
 
@@ -65,7 +65,7 @@ for x in range(0, len(name)):
 
 
 for l in stash_conFIRE.keys():
-    
+
     # Extracting lightning and relative_humidity
     if l == 'lightning' or l == 'relative_humidity':
         stash_constraint = iris.AttributeConstraint(STASH = stash_conFIRE[l])
@@ -74,7 +74,7 @@ for l in stash_conFIRE.keys():
         # Load all cubes
         aList =[]
         cube_list = iris.cube.CubeList()
-        for f in files: 
+        for f in files:
             dat = iris.load_cube(dir + f, stash_constraint)
             aList.append(dat)
         #    print(str(f) + ' file loaded')
@@ -82,21 +82,21 @@ for l in stash_conFIRE.keys():
         # Merge all cubes together
         cube_list = iris.cube.CubeList(aList)
         cubes = cube_list.merge_cube()
-        
+
         # Changing units (RH)
         if l == 'relative_humidity':
             cubes.convert_units(1)
             time = len(cubes.coord("time").points)
 #             for t in range(time):
 #                 cubes.data[t,:,:] = cubes.data[t,:,:] / 100
-                 
+
             print('Range of relative humdity: ' + str(cubes.data.min) + '-' + str(cubes.data.max))
-        
+
         # Changing units (lightning)
         if l == 'lightning':
             F = cubes
             cubes_F = cubes
-            
+
             F.data = (cubes.data * 1000000)**(0.4180) * 0.0408
             F.data[F.data > 1] = 1
             F.data[cubes.data == 0] = 0
@@ -115,8 +115,8 @@ for l in stash_conFIRE.keys():
             cubes = cubes[d:,:,:]
             iris.save(cubes, out)
         print(l + ' has been saved')
-        
-        
+
+
     # For vegcover, treecover, pasture and cropland
     elif l == 'vegcover':
         stash_constraint = iris.AttributeConstraint(STASH = stash_conFIRE[l])
@@ -125,14 +125,14 @@ for l in stash_conFIRE.keys():
         # Load all cubes
         aList =[]
         cube_list = iris.cube.CubeList()
-        for f in files: 
+        for f in files:
             dat = iris.load_cube(dir + f, stash_constraint)
             aList.append(dat)
         #    print(str(f) + ' file loaded')
 
         # Merge all cubes together
         cube_list = iris.cube.CubeList(aList)
-        cube_fractional = cube_list.merge_cube() 
+        cube_fractional = cube_list.merge_cube()
 
 
         for var_type in range(0,len(name_codes)):
@@ -153,9 +153,9 @@ for l in stash_conFIRE.keys():
             out = outfile + name[var_type] + str(years[1]) + '-' + str(years[len(years)-1]) + '.nc'
             iris.save(cube, out)
             print(name[var_type] + ' has been saved')
-            
-            
-    # For alpha & alphaMax        
+
+
+    # For alpha & alphaMax
     elif l == 'alpha':
         stash_constraint = iris.AttributeConstraint(STASH = stash_conFIRE[l])
         print('Now loading: ' + l)
@@ -163,14 +163,14 @@ for l in stash_conFIRE.keys():
         # Load all cubes
         aList =[]
         cube_list = iris.cube.CubeList()
-        for f in files: 
+        for f in files:
             dat = iris.load_cube(dir + f, stash_constraint)
             aList.append(dat)
         #    print(str(f) + ' has loaded')
 
         # Merge all cubes together
         cube_list = iris.cube.CubeList(aList)
-        cube_alpha = cube_list.merge_cube() 
+        cube_alpha = cube_list.merge_cube()
 
         # Extract just the top soil
         index_soil = [cube_alpha.coord('depth').points == 0.05]
@@ -187,8 +187,8 @@ for l in stash_conFIRE.keys():
             cube_soil.data[t,:,:] = cube_soil.data[t,:,:] * porosity.data * 1.2 / 50
 
         # Adjust units to 1
-        cube_soil.units = 1 
-        
+        cube_soil.units = 1
+
         #xxx
         cube_soil_skip_year = cube_soil[d:,:,:]
 
