@@ -22,40 +22,50 @@ from   libs.plot_maps    import *
 # Just needs to say where all the data is stored and fill out a netcdf or pp file for input.
 
 
-dir = '../data/retrieved_codes/2000-2014/'
+dir = '../data/retrieved_codes/jul2000-2014/'
 
-# Data in retrieved_codes/2000-2014 has already been scaled and adjusted (e.g. lightning, RH)
+# Data in 'retrieved_codes/2000-2014' and 'jul2000-2014' has already been scaled and adjusted (e.g. lightning, RH)
+# The jul2000-2014 files have 168 time points and start at July 2000 and go up to June 2014, like the obs files
  
-# files = {'vegcover'           : 'vegcover2000-2014.nc',
-#          'alphaMax'           : 'alphaMax2000-2014.nc',
-#          'alpha'              : 'alpha2000-2014.nc',
-#          'relative_humidity'  : 'relative_humidity2000-2014.nc',
-#          # Modelled:
-#          'treeCover'          : 'treeCover2000-2014.nc',
-#          # Observed:
-# # 		 'treeCover'          : 'treecover2000-2014_masked.nc',
-#          'lightning'          : 'lightning2000-2014.nc',
-#          'pasture'            : 'pasture2000-2014.nc',
-#          'population_density' : 'pop_dens2000-2014.nc',
-#          'cropland'           : 'cropland2000-2014.nc'}
+files = {# Modelled:---------
+		 'alphaMax'           : 'alphaMax_jul2000-2014.nc',
+         'alpha'              : 'alpha_jul2000-2014.nc',
+         'relative_humidity'  : 'relative_humidity_0-1_jul2000-2014.nc', 
+         'treeCover'          : 'canopy2000-2014.nc',
+         'lightning'          : 'lightning_jul2000-2014.nc',
+         'pasture'            : 'pasture_jul2000-2014.nc',
+         'population_density' : 'pop_dens_jul2000-2014.nc',
+         'cropland'           : 'cropland_jul2000-2014.nc',
+		 'vegcover'           : 'vegcover_seed2000-2014.nc'}
+#  Observed: --------
+# 		 'vegcover'           : 'vegcover2000-2014_obs.nc',
+#  		 'treeCover'          : 'treeCover2000-2014_obs.nc',
+# 		 'lightning'		  : 'lightning2000-2014_obs.nc'}
+# 		 'relative_humidity'  : 'relative_humidity2000-2014_obs.nc'}
+# 		 'alpha'			  : 'alpha2000-2014_obs.nc',
+# 		 'alphaMax'			  : 'alphaMax2000-2014_obs.nc'}
 # 
 
-# Observation files
-dir = '../data/obs/'
 
-files = {'alphaMax'           : 'alpha_12monthMax2000-2014_masked.nc',
-		 'alpha'              : 'alpha2000-2014_masked.nc',
-		 'cropland'           : 'cropland2000-2014_masked.nc',
-		 'fire'               : 'fire2000-2014_masked.nc',
-		 'lightning'          : 'lightning_ignitions2000-2014_masked.nc',
-		 'pasture'            : 'pasture2000-2014_masked.nc',
-		 'population_density' : 'population_density2000-2014_masked.nc',
-		 'relative_humidity'  : 'relative_humidity2000-2014_masked.nc',
-		 'treeCover'          : 'treecover2000-2014_masked.nc',
-		 'vegcover'           : 'vegcover2000-2014_masked.nc'}
+# dir = '../data/retrieved_codes/2000-2009/'
+# # For JULES:
+# files = {# Modelled:---------
+# 		 'alphaMax'           : 'alphaMax2000-2009.nc',
+#          'alpha'              : 'alpha2000-2009.nc',
+#          'relative_humidity'  : 'relative_humidity_0-12000-2009.nc', 
+# #          'treeCover'          : 'treeCover2000-2009.nc',
+#          'lightning'          : 'lightning2000-2009.nc',
+#          'pasture'            : 'pasture2000-2009.nc',
+#          'population_density' : 'pop_dens2000-2009.nc',
+#          'cropland'           : 'cropland2000-2009.nc',
+# # 		 'vegcover'           : 'vegcover2000-2009.nc',
+# # JULES: -------------------
+# 		 'vegcover'			  : 'jules_vegcover2000-2009.nc',
+# 		 'treeCover'		  : 'jules_treeCover2000-2009.nc'}
+# 
 
 param_file = '../outputs/params_RH2.csv'
-title_output = 'obs_full'
+title_output = 'veg_seed'
 
 fig = True # False
 dir_fig = '../figures/2000-2014/' + title_output + '/'
@@ -166,11 +176,11 @@ class ConFIRE(object):
                                             self.params['suppression_x0'], -self.params['suppression_k'])
         
         ## burnt area us just limitation of each control muliplied together. 
-        self.burnt_area = self.params['max_f'] * self.standard_fuel * self.standard_moisture *                           self.standard_ignitions * self.standard_suppression
+        self.burnt_area = self.params['max_f'] * self.standard_fuel * self.standard_moisture * self.standard_ignitions * self.standard_suppression
             
-        self.standard_moisture    = self.standard_moisture    /                                     self.sigmoid(0.0, self.params['moisture_x0'], 
+        self.standard_moisture    = self.standard_moisture    / self.sigmoid(0.0, self.params['moisture_x0'], 
                                                  -self.params['moisture_k'])
-        self.standard_suppression = self.standard_suppression /                                     self.sigmoid(0.0, self.params['suppression_x0'], 
+        self.standard_suppression = self.standard_suppression / self.sigmoid(0.0, self.params['suppression_x0'], 
                                                  -self.params['suppression_k'])
     
         ## if the inputs are iris cubes, we can add some useful metadata
@@ -410,7 +420,7 @@ plt.figure(figsize = (10, 7.5))
 plotModComponet(model.standard_fuel, 1, cmap = cmap_fuel)
 plotModComponet(model.standard_moisture, 2, cmap = cmap_moisture)
 plotModComponet(model.standard_ignitions, 3, cmap = cmap_ignitions)
-plotModComponet(model.standard_suppression, 4, cmap = cmap_suppression)
+plotModComponet(model.standard_suppression, 4, cmap = cmap_suppression) 
 plt.suptitle(title_output, fontsize=16)
 plt.subplots_adjust(top=0.88)
 if fig:
