@@ -1,11 +1,11 @@
-#!/usr/bin/env python
+#\!/usr/bin/env python
 # coding: utf-8
 
 # ## Retrieving input from UK-ESM: mulitple years
 
 # This is to be run on JASMIN and points to the revelent directories in that working space.
 # For a more detailed walk through, go to retrieve_stash
-# [10/09/19]: I've taken out the scaling of RH to turn it into a probability as I think this is already done
+# [10/09/19]: I've taken out the scaling of RH to turn it into a probability as I think this is already done. Canopy is calculated in this extraction.
 
 import iris
 import iris.coord_categorisation
@@ -149,7 +149,11 @@ for l in stash_conFIRE.keys():
             # For skipping the first x months
             #xxx
             cube = cube[d:,:,:,:].collapsed(['pseudo_level'], iris.analysis.SUM)
-
+            
+            # Turning treecover into canopy: canopy = treecover * 0.8
+            if name[var_type] == 'treeCover':
+                cube.data = cube.data * 0.8
+                
             out = outfile + name[var_type] + str(years[1]) + '-' + str(years[len(years)-1]) + '.nc'
             iris.save(cube, out)
             print(name[var_type] + ' has been saved')
