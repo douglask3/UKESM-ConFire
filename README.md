@@ -27,11 +27,11 @@ Added [24/09/19] by Megan Brown
 
 _Note: iris is needed in order to run these scripts_
 
-To extract data from UK Earth System Model (UKESM), use the [multi-year_extract_inputs](https://github.com/douglask3/UKESM-ConFire/tree/mb_Tree/notebooks/multi-year_extract_inputs.ipynb) and set the years of interest in the file in the notebooks folder.
+To extract data from UK Earth System Model (UKESM), use the [multi-year_extract_inputs](https://github.com/douglask3/UKESM-ConFire/tree/mb_Tree/notebooks/multi-year_extract_inputs.ipynb) and set the years of interest in the file (notebooks folder).
 Both the .ipynb and .py are identical wrt code - .py is designed for running in JASMIN, while .ipynb gives a description of what the code is doing.
 Also see: [retrieve_stash.ipynb](https://github.com/douglask3/UKESM-ConFire/tree/mb_Tree/notebooks/retrieve_stash.ipynb) which gives a more detailed breakdown of the code.
 
-The outputs of the retrieved stash from UKESM can be plotted up using the [plot_stash_outputs](https://github.com/douglask3/UKESM-ConFire/tree/mb_Tree/notebooks/plot_stash_outputs.ipynb) to check it has been retrieved properly.
+The outputs of the extracted inputs from UKESM can be plotted up using the [plot_stash_outputs](https://github.com/douglask3/UKESM-ConFire/tree/mb_Tree/notebooks/plot_stash_outputs.ipynb) to check it has been retrieved properly.
 
 ## Running the model
 
@@ -51,8 +51,8 @@ Here are some guidelines and useful tips for make_model_output script:
 
 There are a few scripts in the notebooks folder which are helpful for regridding certain data and filtering out unwanted years, as well as reformatting cubes.
 
-* [Regridding JULES](https://github.com/douglask3/UKESM-ConFire/tree/mb_Tree/notebooks/Regridding_JULES_data.ipynb)
-* [Regridding to n96-e](https://github.com/douglask3/UKESM-ConFire/tree/mb_Tree/notebooks/regrid_nc.ipynb)
+* [Regridding JULES](https://github.com/douglask3/UKESM-ConFire/tree/mb_Tree/notebooks/Regridding_JULES_data.ipynb): JULES data is in a funny format and needs condensing into one .nc file.
+* [Regridding to n96-e](https://github.com/douglask3/UKESM-ConFire/tree/mb_Tree/notebooks/regrid_nc.ipynb): If you need to regrid the observations, this is the script for you.
 * [Regridding and condensing population density](https://github.com/douglask3/UKESM-ConFire/tree/mb_Tree/notebooks/pop_dens_regrid.ipynb):
 This script is also useful for changing coordinates on cubes and various other bits and pieces.
 * [UKESM cube format](https://github.com/douglask3/UKESM-ConFire/tree/mb_Tree/notebooks/formatting_files.ipynb): All file inputs must have the same mapping coordinates and time frames. This script will take the data from the file of interest and put it into a UKESM-framed cube.
@@ -62,6 +62,6 @@ The script isn't written that well and is quite clunky - ye hath been warn&eacut
 ## Plot model outputs
 
 [Plot burnt area](https://github.com/douglask3/UKESM-ConFire/tree/mb_Tree/notebooks/plot_burnt_area.ipynb) takes the outputs from the model run and will plot them - both spatially and temporally if one so desires.
-I've also written some code in there which will plot the standard controls and can take the difference between two runs. Again, this script is poorly written and is cringeworthy. 
+I've also written some code in there which will plot the standard controls and can take the difference between two runs. Again, this script is poorly written and cringeworthy. 
 
 If there are any other strange scripts I've forgotten to mention, just let me (Megan) know.
